@@ -1,0 +1,18 @@
+import WasteWiseABI from "./wasteWiseABI.json";
+import MarketPlaceABI from "./marketPlaceABI.json";
+import TokenABI from "./tokenABI.json";
+import WASTEWISE_TOKEN_ABI from "./WASTEWISE_TOKEN_ABI.json";
+
+const WASTEWISE_ADDRESS = "0xE80d72E454bEdEd5F7729b333Ee3256532473F85";
+const WASTEWISE_TOKEN_ADDRESS = "0x381d5A09481369e4be2bd5a9E261959401Ff0B4e";
+const MARKETPLACE_ADDRESS = "0xe03f23F43A0Ccbe811aDa56B8039baFb2c87a474";
+
+export {
+  WASTEWISE_ADDRESS,
+  WASTEWISE_TOKEN_ADDRESS,
+  MARKETPLACE_ADDRESS,
+  WasteWiseABI,
+  MarketPlaceABI,
+  TokenABI,
+  WASTEWISE_TOKEN_ABI,
+};
