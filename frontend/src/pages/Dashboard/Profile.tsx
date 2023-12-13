@@ -8,6 +8,7 @@ import useNotificationCount from "../../hooks/useNotificationCount";
 import { useNavigate } from "react-router-dom";
 import { CountryDropdown } from "react-country-region-selector";
 import {
+  useConnectionStatus,
   useContract,
   useContractEvents,
   useContractWrite,
@@ -25,6 +26,9 @@ const Profile = () => {
   const [isEmailValid, setIsEmailValid] = useState<boolean>(true);
   const [isSuccess, setSuccess] = useState(false);
   const { contract } = useContract(WASTEWISE_ADDRESS, WasteWiseABI);
+  const connected = useConnectionStatus();
+
+  console.log(connected);
 
   const { mutateAsync, isLoading, error } = useContractWrite(
     contract,
@@ -69,24 +73,24 @@ const Profile = () => {
     }
   }, [isSuccess]);
 
-  // useEffect(() => {
-  //   if (error) {
-  //     toast.error(<div>Something went wrong. Try again</div>, {
-  //       onAutoClose: (t) => {
-  //         wastewiseStore
-  //           .setItem(t.id.toString(), {
-  //             id: t.id,
-  //             title: t.title,
-  //             datetime: new Date(),
-  //             type: t.type,
-  //           })
-  //           .then(function (_: any) {
-  //             setNotifCount(notificationCount);
-  //           });
-  //       },
-  //     });
-  //   }
-  // }, [error]);
+  useEffect(() => {
+    if (error) {
+      toast.error(<div>Something went wrong. Try again</div>, {
+        onAutoClose: (t) => {
+          wastewiseStore
+            .setItem(t.id.toString(), {
+              id: t.id,
+              title: t.title,
+              datetime: new Date(),
+              type: t.type,
+            })
+            .then(function (_: any) {
+              setNotifCount(notificationCount);
+            });
+        },
+      });
+    }
+  }, [error]);
 
   useEffect(() => {
     if (isLoading) {

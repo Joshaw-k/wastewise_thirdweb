@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { WASTEWISE_ADDRESS, WasteWiseABI } from "../../constants";
-import { useAddress } from "@thirdweb-dev/react";
+import { useAddress, useContract, useContractRead } from "@thirdweb-dev/react";
 
 type contextType = {
   wastewiseStore: any;
@@ -111,12 +111,19 @@ const WastewiseProvider = ({ children }: { children: ReactNode }) => {
     fetchNotifications();
   }, [notifCount]);
 
-  const { contract } = useContractRead(WASTEWISE_ADDRESS, WasteWiseABI);
+  const { contract } = useContract(WASTEWISE_ADDRESS, WasteWiseABI);
 
-  const { data, isLoading, error } = useContractRead(
-    contract,
-    "createUserAcct"
-  );
+  const {
+    data: getUserData,
+    isLoading,
+    error,
+  } = useContractRead(contract, "getUser", [], { from: address });
+
+  // if (getUserData) {
+  //   setIsRegistered(
+  //     getUserData ? Number((getUserData as any)?.userAddr) !== 0 : false
+  //   );
+  // }
 
   // const { data } = useContractRead({
   //   address: WASTEWISE_ADDRESS,
@@ -132,6 +139,16 @@ const WastewiseProvider = ({ children }: { children: ReactNode }) => {
 
   // console.log(data);
 
+  const { data: getStatistics } = useContractRead(
+    contract,
+    "getStatistics",
+    [],
+    { from: address }
+  );
+
+  // if (getStatistics) {
+  // setStatistics(getStatistics as any);
+  // }
   // const statisticsRead = useContractRead({
   //   address: WASTEWISE_ADDRESS,
   //   abi: WasteWiseABI,
@@ -142,15 +159,19 @@ const WastewiseProvider = ({ children }: { children: ReactNode }) => {
   //   },
   // });
 
-  // useEffect(() => {
-  //   setIsRegistered(data ? Number((data as any)?.userAddr) !== 0 : false);
-  //   setCurrentUser(data as any);
-  //   return () => {};
-  // }, [data, isRegistered]);
+  console.log(getUserData);
 
-  // useEffect(() => {
-  //   setStatistics(statisticsRead.data);
-  // }, [statisticsRead.data]);
+  useEffect(() => {
+    setIsRegistered(
+      getUserData ? Number((getUserData as any)?.userAddr) !== 0 : false
+    );
+    setCurrentUser(getUserData as any);
+    return () => {};
+  }, [getUserData, isRegistered]);
+
+  useEffect(() => {
+    setStatistics(getStatistics);
+  }, [getStatistics]);
 
   return (
     <WastewiseContext.Provider

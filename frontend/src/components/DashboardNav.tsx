@@ -2,13 +2,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useWasteWiseContext } from "../context";
 import NotificationCard from "./NotificationCard";
 import { useRef } from "react";
-import { useDisconnect } from "wagmi";
 import { logout } from "../assets";
+import { useDisconnect } from "@thirdweb-dev/react";
 
 const DashboardNav = ({ title }: { title: string }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { disconnect, isSuccess } = useDisconnect();
+  const disconnect = useDisconnect();
+  // const { disconnect, isSuccess } = useDisconnect();
   const { notifCount, notifications } = useWasteWiseContext();
   const mobileNotificationsModal = useRef<HTMLDialogElement>(null);
 

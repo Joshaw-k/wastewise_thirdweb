@@ -3,7 +3,6 @@ import { home, logout, settings, wallet } from "../assets";
 import { Link, useLocation } from "react-router-dom";
 import { activeBgColor } from "../utils";
 import Logo from "./Logo";
-import { useAccount, useContractRead } from "wagmi";
 import { useWasteWiseContext } from "../context";
 import { WASTEWISE_ADDRESS, WasteWiseABI } from "../../constants";
 import { MdEventNote, MdAdminPanelSettings } from "react-icons/md";
@@ -19,20 +18,26 @@ import {
   FaUserShield,
   FaWallet,
 } from "react-icons/fa6";
+import { useAddress, useContract, useContractRead } from "@thirdweb-dev/react";
 
 type Props = {};
 
 const Sidebar = (props: Props) => {
   const [isActive, setIsActive] = useState("");
   const location = useLocation();
-  const { address } = useAccount();
+  const address = useAddress();
   const { currentUser } = useWasteWiseContext();
-  const { data } = useContractRead({
-    address: WASTEWISE_ADDRESS,
-    abi: WasteWiseABI,
-    functionName: "getUserTransactions",
-    account: address,
-  });
+  const { contract } = useContract(WASTEWISE_ADDRESS, WasteWiseABI);
+  const { data, isLoading, error } = useContractRead(
+    contract,
+    "getUserTransactions"
+  );
+  // const { data } = useContractRead({
+  //   address: WASTEWISE_ADDRESS,
+  //   abi: WasteWiseABI,
+  //   functionName: "getUserTransactions",
+  //   account: address,
+  // });
 
   // update activeItem based on current location
   useEffect(() => {
