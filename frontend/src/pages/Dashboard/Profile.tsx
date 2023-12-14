@@ -37,7 +37,10 @@ const Profile = () => {
 
   const { data, isLoading: settling } = useContractEvents(
     contract,
-    "UserEdited"
+    "UserEdited",
+    {
+      subscribe: true,
+    }
   );
   // const { data, error, const result = await mutateAsynrror, isLoading, isSuccess } =
   //   useContract      args: [name, country, gender, number, em//     address: WASTEWISE_ADDRESS,
