@@ -96,8 +96,8 @@ const DashboardNav = ({ title }: { title: string }) => {
                   Your Notifications
                 </div>
                 {console.log(notifications)}
-                {notifications.map((eachNotification: any) => (
-                  <div className="flex flex-col space-y-6 gap-y-2">
+                {notifications.map((eachNotification: any, index: number) => (
+                  <div className="flex flex-col space-y-6 gap-y-2" key={index}>
                     <NotificationCard {...eachNotification} />
                   </div>
                 ))}
@@ -153,8 +153,11 @@ const DashboardNav = ({ title }: { title: string }) => {
                 <h3 className="font-bold text-lg">Notifications</h3>
                 <p className="py-4">All your notifications in one place</p>
                 <div className="space-y-2 overflow-y-auto">
-                  {notifications.map((eachNotification: any) => (
-                    <div className="flex flex-col space-y-6 gap-y-2">
+                  {notifications.map((eachNotification: any, index: number) => (
+                    <div
+                      className="flex flex-col space-y-6 gap-y-2"
+                      key={index}
+                    >
                       <NotificationCard {...eachNotification} />
                     </div>
                   ))}
