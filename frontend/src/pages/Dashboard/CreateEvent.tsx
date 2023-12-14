@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { useAccount, useContractWrite, useWaitForTransaction } from "wagmi";
 import { useNavigate } from "react-router-dom";
 import { MARKETPLACE_ADDRESS, MarketPlaceABI } from "../../../constants";
 import { pinFileToIPFS } from "../../utils";
 import { toast } from "sonner";
 import { parseEther } from "viem";
+import {
+  useContract,
+  useContractEvents,
+  useContractWrite,
+} from "@thirdweb-dev/react";
 
 type Props = {};
 
@@ -41,33 +45,60 @@ const CreateEvent = (props: Props) => {
     }
   };
 
-  const { write, isLoading, data } = useContractWrite({
-    address: MARKETPLACE_ADDRESS,
-    abi: MarketPlaceABI,
-    functionName: "createListing",
-    args: [name, description, image, parseEther(`${price}`), deadline],
-    onError() {
-      toast.error("!Failed to create an event.");
-      setLoading(false);
-    },
-  });
+  const { contract } = useContract(MARKETPLACE_ADDRESS, MarketPlaceABI);
 
-  useWaitForTransaction({
-    hash: data?.hash,
-    onSettled(data, error) {
-      if (data?.blockHash) {
-        toast.success("Event successfully created");
-        setLoading(false);
-        navigate("/dashboard/marketplace");
-      }
-    },
-  });
+  const { mutateAsync, isLoading, error } = useContractWrite(
+    contract,
+    "createListing"
+  );
+
+  // const { write, isLoading, data } = useContractWrite({
+  //   address: MARKETPLACE_ADDRESS,
+  //   abi: MarketPlaceABI,
+  //   functionName: "createListing",
+  //   args: [name, description, image, parseEther(`${price}`), deadline],
+  //   onError() {
+  //     toast.error("!Failed to create an event.");
+  //     setLoading(false);
+  //   },
+  // });
+
+  const { data, isLoading: settling } = useContractEvents(
+    contract,
+    "ListingCreated",
+    {
+      subscribe: true,
+    }
+  );
+
+  // useWaitForTransaction({
+  //   hash: data?.hash,
+  //   onSettled(data, error) {
+  //     if (data?.blockHash) {
+  //       toast.success("Event successfully created");
+  //       setLoading(false);
+  //       navigate("/dashboard/marketplace");
+  //     }
+  //   },
+  // });
 
   useEffect(() => {
     if (image != "") {
-      write?.();
+      mutateAsync?.({
+        args: [name, description, image, parseEther(`${price}`), deadline],
+      }).then((data) => {
+        if (data.receipt) {
+          toast.success("Event successfully created");
+          setLoading(false);
+          navigate("/dashboard/marketplace");
+        }
+      });
     }
   }, [image, name, description, deadline, price]);
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   const navigate = useNavigate();
 
