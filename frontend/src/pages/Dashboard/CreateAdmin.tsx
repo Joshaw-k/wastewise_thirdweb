@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
-import WASTEWISE_ABI from "../../../constants/wasteWiseABI.json";
 import { toast } from "sonner";
-import { WASTEWISE_ADDRESS } from "../../../constants";
+import { WASTEWISE_ADDRESS, WasteWiseABI } from "../../../constants";
+import { useAddress, useContract, useContractWrite } from "@thirdweb-dev/react";
 
 type Props = {};
 
@@ -21,65 +15,91 @@ const CreateAdmin = (props: Props) => {
   const [role, setRole] = useState<string>();
   const navigate = useNavigate();
 
-  const { config: addAdmin } = usePrepareContractWrite({
-    address: WASTEWISE_ADDRESS,
-    abi: WASTEWISE_ABI,
-    functionName: "addAdmins",
-    args: [address],
-    onError(data: any) {
-      console.log(data);
-    },
-  });
+  const { contract } = useContract(WASTEWISE_ADDRESS, WasteWiseABI);
+
   const {
-    data: approveAdmin,
-    write,
+    mutateAsync: addAdmin,
     isLoading: loadingA,
-  } = useContractWrite(addAdmin);
+    error: errorA,
+  } = useContractWrite(contract, "addAdmins");
 
-  const { config: addVerifier } = usePrepareContractWrite({
-    address: WASTEWISE_ADDRESS,
-    abi: WASTEWISE_ABI,
-    functionName: "addVerifiers",
-    args: [address],
-    onError(data: any) {
-      console.log(data);
-    },
-  });
   const {
-    data: approveVerifier,
-    write: write2,
+    mutateAsync: addverifier,
     isLoading: loadingV,
-  } = useContractWrite(addVerifier);
+    error: errorV,
+  } = useContractWrite(contract, "addAdmins");
 
-  const { isLoading: isAddingVerifier, isSuccess: isVerifierSuccess } =
-    useWaitForTransaction({
-      hash: approveVerifier?.hash,
-      onSettled(data, error) {
-        if (data?.blockHash) {
-          console.log("he don enter");
-          navigate("/dashboard");
-        }
-      },
-    });
-  const { isLoading: isAddingAdmin, isSuccess: isAdminSuccess } =
-    useWaitForTransaction({
-      hash: approveAdmin?.hash,
-      onSettled(data, error) {
-        if (data?.blockHash) {
-          navigate("/dashboard");
-        }
-      },
-    });
+  // const { config: addAdmin } = usePrepareContractWrite({
+  //   address: WASTEWISE_ADDRESS,
+  //   abi: WASTEWISE_ABI,
+  //   functionName: "addAdmins",
+  //   args: [address],
+  //   onError(data: any) {
+  //     console.log(data);
+  //   },
+  // });
+  // const {
+  //   data: approveAdmin,
+  //   write,
+  //   isLoading: loadingA,
+  // } = useContractWrite(addAdmin);
+
+  // const { config: addVerifier } = usePrepareContractWrite({
+  //   address: WASTEWISE_ADDRESS,
+  //   abi: WASTEWISE_ABI,
+  //   functionName: "addVerifiers",
+  //   args: [address],
+  //   onError(data: any) {
+  //     console.log(data);
+  //   },
+  // });
+  // const {
+  //   data: approveVerifier,
+  //   write: write2,
+  //   isLoading: loadingV,
+  // } = useContractWrite(addVerifier);
+
+  // const { isLoading: isAddingVerifier, isSuccess: isVerifierSuccess } =
+  //   useWaitForTransaction({
+  //     hash: approveVerifier?.hash,
+  //     onSettled(data, error) {
+  //       if (data?.blockHash) {
+  //         console.log("he don enter");
+  //         navigate("/dashboard");
+  //       }
+  //     },
+  //   });
+  // const { isLoading: isAddingAdmin, isSuccess: isAdminSuccess } =
+  //   useWaitForTransaction({
+  //     hash: approveAdmin?.hash,
+  //     onSettled(data, error) {
+  //       if (data?.blockHash) {
+  //         navigate("/dashboard");
+  //       }
+  //     },
+  //   });
   const handleAddAdmin = async () => {
-    write?.();
     setLoading(true);
-    console.log(true);
+    const result = await addAdmin?.({ args: [address] });
+    if (result.receipt) {
+      toast.success("Successfully Created Admin", {
+        // description: "My description",
+        duration: 5000,
+      });
+      navigate("/dashboard");
+    }
+    // console.log(true);
   };
   const handleAddVerifier = async () => {
-    console.log("clicking");
-    write2?.();
-    setLoading(true);
-    console.log(true);
+    const result = await addverifier?.({ args: [address] });
+    if (result.receipt) {
+      toast.success("Successfully Created Verifier", {
+        // description: "My description",
+        duration: 5000,
+      });
+      navigate("/dashboard");
+    }
+    // console.log(true);
   };
 
   const handleSubmit = (e: any) => {
@@ -92,23 +112,23 @@ const CreateAdmin = (props: Props) => {
     }
   };
 
-  useEffect(() => {
-    if (isVerifierSuccess) {
-      toast.success("Successfully Created Verifier", {
-        // description: "My description",
-        duration: 5000,
-      });
-    }
-  }, [isVerifierSuccess]);
+  // useEffect(() => {
+  //   if (isVerifierSuccess) {
+  //     toast.success("Successfully Created Verifier", {
+  //       // description: "My description",
+  //       duration: 5000,
+  //     });
+  //   }
+  // }, [isVerifierSuccess]);
 
-  useEffect(() => {
-    if (isAdminSuccess) {
-      toast.success("Successfully Created Admin", {
-        // description: "My description",
-        duration: 5000,
-      });
-    }
-  }, [isAdminSuccess]);
+  // useEffect(() => {
+  //   if (isAdminSuccess) {
+  //     toast.success("Successfully Created Admin", {
+  //       // description: "My description",
+  //       duration: 5000,
+  //     });
+  //   }
+  // }, [isAdminSuccess]);
 
   useEffect(() => {
     if (loadingA) {
@@ -211,9 +231,7 @@ const CreateAdmin = (props: Props) => {
               </option>
             </select>
             <Button name="submit" size="block" customStyle="w-full">
-              {(loadingA || loadingV || isAddingVerifier || isAddingAdmin) && (
-                <span className="loading"></span>
-              )}
+              {(loadingA || loadingV) && <span className="loading"></span>}
             </Button>
             {/* <button
               className="btn btn-primary block m-auto w-full"
